@@ -25,31 +25,35 @@ angular.module('project', ['ngRoute', 'firebase'])
             base        : '',
             todo        : '',
             finished    : '',
+            todoArray   : null,
+            finArray    : null,
             setUID      : function(UID){
+                console.log("setUID");
                 this.base = this.firebaseURL + 'users/' + UID + "/";
                 this.todo = this.base + "todo/";
                 this.finished = this.base + "finished/";
             },
             $TODOArray  : function() {
-                console.log(this.todo);
-                return $firebase(new Firebase(this.todo)).$asArray();
+                if (this.todoArray === null) this.todoArray = $firebase(new Firebase(this.todo)).$asArray();
+                return this.todoArray;
             },
             $FINArray   : function(){
-                console.log(this.finished);
-                return $firebase(new Firebase(this.finished)).$asArray();
+                if (this.finArray === null) this.finArray = $firebase(new Firebase(this.finished)).$asArray();
+                return this.finArray;
             },
             $firebaseRef: function(){
+                console.log(this.firebaseURL);
                 return new Firebase(this.firebaseURL);
             }
-        }
+        };
     })
     .factory('$fbPatch', function(){
         this.clearObj = function(obj){
-            delete obj.$id
-            delete obj.$priority
-            delete obj.$$hashKey
+            delete obj.$id;
+            delete obj.$priority;
+            delete obj.$$hashKey;
             return obj;
-        }
+        };
         return this;
     })
     .config(function($routeProvider) {
@@ -81,34 +85,42 @@ angular.module('project', ['ngRoute', 'firebase'])
             name: 'login'
         }));
         port.onMessage.addListener(function(msg) {
-            data = JSON.parse(msg);
-            login = data.result.login;
-            console.log(login);
+            var data = JSON.parse(msg);
+            var login = data.result.login;
+            console.log($URL.$firebaseRef());
             $URL.$firebaseRef().authWithPassword(login, function(error, authData) {
-                console.log(error);
-                console.log(authData);
-                if (error !== null){
-                }else{
+                if (error === null){
+                    console.log(authData);
                     $URL.setUID(authData.uid);
-                    console.log($URL.$FINArray())
-                    $location.path('/list');
+                    $location.url("/list")
+                    if(!$scope.$$phase) $scope.$apply(); //important!!!
+                }else{
+                    console.log(error);
                 }
             }, {
                 remember: "sessionOnly"
             });
         });
-
         $scope.submit = function(){
-            port.postMessage(JSON.stringify({
-                type: 'setData',
-                data: {
-                    login: $scope.user
+            var login = $scope.user;
+            $URL.$firebaseRef().authWithPassword(login, function(error, authData) {
+                if (error === null){
+                    $URL.setUID(authData.uid);
+                    port.postMessage(JSON.stringify({
+                        type: 'setData',
+                        data: {
+                            login: $scope.user
+                        }
+                    }));
+                    port.onMessage.addListener(function(msg) {
+                        console.log(msg);
+                    });
+                    $location.path('/list');
                 }
-            }));
-            port.onMessage.addListener(function(msg) {
-                console.log(msg);
+            }, {
+                remember: "sessionOnly"
             });
-        }
+        };
     })
 
     .controller('ListCtrl', function($scope, $URL, $fbPatch, $location) {
@@ -120,20 +132,18 @@ angular.module('project', ['ngRoute', 'firebase'])
                     $scope.projects.$remove(key).then(function(data){
                         $URL.$FINArray().$add($fbPatch.clearObj(project)).then(function(data) {
                         });
-                    })
+                    });
                 }
             });
         };
         $scope.showFinished = function(){
             $scope.projects = $URL.$FINArray();
             $scope.showType = "FIN";
-        }
-
+        };
         $scope.showTodo = function(){
-            $scope.projects = $URL.$TODOArray;
+            $scope.projects = $URL.$TODOArray();
             $scope.showType = "TODO";
-        }
-
+        };
         $scope.remaining = function() {
             var count = 0;
             angular.forEach($scope.projects, function(project) {
