@@ -1,6 +1,5 @@
 <input type="text" ng-model="search" class="search-query" placeholder="Search">
 
-
 <label ng-show="showType=='TODO'">{{remaining()}} of {{projects.length}} remaining</label>
 <label ng-show="showType=='FIN'">{{projects.length}} Finished</label>
 
@@ -8,23 +7,23 @@
 <button ng-click="showTodo()" ng-show="showType!='TODO'" class="btn btn-primary btn-sm">Show Todo</button>
 <button ng-click="showFinished()" ng-show="showType!='FIN'" class="btn btn-primary btn-sm">Show Finished</button>
 <table class="table table-bordered">
-  <thead>
-  <tr>
-    <th class="col-xs-9">Todo</th>
-    <th class="col-xs-2">Importance</th>
-    <th class="col-xs-1"><a href="#/new" ng-show="showType=='TODO'"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr ng-repeat="project in projects | filter:search | orderBy:'name'" >
-    <td class="done-{{project.done}}">{{project.description}}</td>
-    <td>{{project.importance.name}}</td>
-    <td>
-      <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
-      <input type="checkbox" ng-model="project.done" ng-show="showType=='TODO'" ng-click="updateDone(project)">
-    </td>
-      {{ project.id }}
-  </tr>
+    <thead>
+    <tr>
+        <th class="col-xs-9">Todo</th>
+        <th class="col-xs-2">Importance</th>
+        <th class="col-xs-1"><a href="#/new" ng-show="showType=='TODO'"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="project in projects | filter:search | orderBy:'name'" >
+        <td class="done-{{project.done}}">{{project.description}}</td>
+        <td>{{project.importance.name}}</td>
+        <td>
+            <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
+            <input type="checkbox" ng-model="project.done" ng-show="showType=='TODO'" ng-click="updateDone(project)">
+        </td>
+        {{ project.id }}
+    </tr>
 
-  </tbody>
+    </tbody>
 </table>

@@ -22,11 +22,11 @@ angular.module('project', ['ngRoute', 'firebase'])
     }])
 
     .value('URL', {
+        firebaseURL: firebaseURL,
         base: base,
         todo: base + 'todo/',
         finished: base + 'finished/'
     })
-
     .factory('$TODO', function($firebase, URL) {
         return $firebase(new Firebase(URL.todo))
     })
@@ -38,6 +38,9 @@ angular.module('project', ['ngRoute', 'firebase'])
     })
     .factory('$FINArray', function($firebase, URL) {
         return $firebase(new Firebase(URL.finished)).$asArray()
+    })
+    .factory('$firebaseRef', function($firebase, URL){
+        return new Firebase(URL.firebaseURL)
     })
     .factory('$fbPatch', function(){
         this.clearObj = function(obj){
@@ -54,6 +57,11 @@ angular.module('project', ['ngRoute', 'firebase'])
                 controller:'ListCtrl',
                 templateUrl:'list.html'
             })
+            .when('/login', {
+                controller: 'LoginCtrl',
+                templateUrl:'login.html'
+
+            })
             .when('/edit/:showType/:projectId', {
                 controller:'EditCtrl',
                 templateUrl:'detail.html'
@@ -66,8 +74,21 @@ angular.module('project', ['ngRoute', 'firebase'])
                 redirectTo:'/'
             });
     })
+    .controller('LoginCtrl', function($scope, $firebaseRef){
+        $scope.submit = function(){
+            console.log($scope.user);
+            $firebaseRef.createUser($scope.user, function(error) {
+                if (error === null) {
+                    console.log("User created successfully");
+                } else {
+                    console.log("Error creating user:", error);
+                }
+            });
+        }
+    })
 
-    .controller('ListCtrl', function($scope, $TODOArray, $FINArray, $fbPatch) {
+    .controller('ListCtrl', function($scope, $TODOArray, $FINArray, $fbPatch, $location) {
+        $location.path('/login');
         $scope.projects = $TODOArray;
         $scope.showType = "TODO";
         $scope.archive = function() {
@@ -80,8 +101,6 @@ angular.module('project', ['ngRoute', 'firebase'])
                 }
             });
         };
-
-
         $scope.showFinished = function(){
             $scope.projects = $FINArray;
             $scope.showType = "FIN";
