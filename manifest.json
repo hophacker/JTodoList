@@ -21,7 +21,7 @@
     },
     "content_scripts": [],
     "options_page": "options.html",
-    "permissions": [ "tabs", "http://*/*", "https://*/*", "cookies", "notifications", "contextMenus" ],
+    "permissions": [ "storage", "tabs", "http://*/*", "https://*/*", "cookies", "notifications", "contextMenus" ],
     "update_url": "https://clients2.google.com/service/update2/crx",
     "content_security_policy": "script-src 'self' 'unsafe-eval' https://*.firebaseio.com https://ajax.googleapis.com https://cdn.firebase.com;object-src 'self'"
 }

@@ -4,15 +4,14 @@
  state:  [0:newly created, 1:done, 2:archieved]
  }
  */
+var port = chrome.extension.connect({name: "StorageConnection"});
+
 var importances = [
     {level:0, name:'Low'     },
     {level:1, name:'Medium'  },
     {level:2, name:'High'    },
     {level:3, name:'Extreme' }
 ],  default_importance = importances[1];
-var firebaseURL = 'https://boiling-heat-52.firebaseio.com/',
-    username = 'hophacker/',
-    base = firebaseURL + username;
 
 angular.module('project', ['ngRoute', 'firebase'])
 
@@ -20,27 +19,29 @@ angular.module('project', ['ngRoute', 'firebase'])
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension):/);
         // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
     }])
-
-    .value('URL', {
-        firebaseURL: firebaseURL,
-        base: base,
-        todo: base + 'todo/',
-        finished: base + 'finished/'
-    })
-    .factory('$TODO', function($firebase, URL) {
-        return $firebase(new Firebase(URL.todo))
-    })
-    .factory('$FIN', function($firebase, URL) {
-        return $firebase(new Firebase(URL.finished))
-    })
-    .factory('$TODOArray', function($firebase, URL) {
-        return $firebase(new Firebase(URL.todo)).$asArray()
-    })
-    .factory('$FINArray', function($firebase, URL) {
-        return $firebase(new Firebase(URL.finished)).$asArray()
-    })
-    .factory('$firebaseRef', function($firebase, URL){
-        return new Firebase(URL.firebaseURL)
+    .factory('$URL', function($firebase){
+        return {
+            firebaseURL :  'https://boiling-heat-52.firebaseio.com/',
+            base        : '',
+            todo        : '',
+            finished    : '',
+            setUID      : function(UID){
+                this.base = this.firebaseURL + 'users/' + UID + "/";
+                this.todo = this.base + "todo/";
+                this.finished = this.base + "finished/";
+            },
+            $TODOArray  : function() {
+                console.log(this.todo);
+                return $firebase(new Firebase(this.todo)).$asArray();
+            },
+            $FINArray   : function(){
+                console.log(this.finished);
+                return $firebase(new Firebase(this.finished)).$asArray();
+            },
+            $firebaseRef: function(){
+                return new Firebase(this.firebaseURL);
+            }
+        }
     })
     .factory('$fbPatch', function(){
         this.clearObj = function(obj){
@@ -53,11 +54,11 @@ angular.module('project', ['ngRoute', 'firebase'])
     })
     .config(function($routeProvider) {
         $routeProvider
-            .when('/', {
+            .when('/list', {
                 controller:'ListCtrl',
                 templateUrl:'list.html'
             })
-            .when('/login', {
+            .when('/', {
                 controller: 'LoginCtrl',
                 templateUrl:'login.html'
 
@@ -74,40 +75,62 @@ angular.module('project', ['ngRoute', 'firebase'])
                 redirectTo:'/'
             });
     })
-    .controller('LoginCtrl', function($scope, $firebaseRef){
-        $scope.submit = function(){
-            console.log($scope.user);
-            $firebaseRef.createUser($scope.user, function(error) {
-                if (error === null) {
-                    console.log("User created successfully");
-                } else {
-                    console.log("Error creating user:", error);
+    .controller('LoginCtrl', function($scope, $URL, $location){
+        port.postMessage(JSON.stringify({
+            type: 'getData',
+            name: 'login'
+        }));
+        port.onMessage.addListener(function(msg) {
+            data = JSON.parse(msg);
+            login = data.result.login;
+            console.log(login);
+            $URL.$firebaseRef().authWithPassword(login, function(error, authData) {
+                console.log(error);
+                console.log(authData);
+                if (error !== null){
+                }else{
+                    $URL.setUID(authData.uid);
+                    console.log($URL.$FINArray())
+                    $location.path('/list');
                 }
+            }, {
+                remember: "sessionOnly"
+            });
+        });
+
+        $scope.submit = function(){
+            port.postMessage(JSON.stringify({
+                type: 'setData',
+                data: {
+                    login: $scope.user
+                }
+            }));
+            port.onMessage.addListener(function(msg) {
+                console.log(msg);
             });
         }
     })
 
-    .controller('ListCtrl', function($scope, $TODOArray, $FINArray, $fbPatch, $location) {
-        $location.path('/login');
-        $scope.projects = $TODOArray;
+    .controller('ListCtrl', function($scope, $URL, $fbPatch, $location) {
+        $scope.projects = $URL.$TODOArray();
         $scope.showType = "TODO";
         $scope.archive = function() {
             angular.forEach($scope.projects, function(project, key) {
                 if (project.done){
                     $scope.projects.$remove(key).then(function(data){
-                        $FINArray.$add($fbPatch.clearObj(project)).then(function(data) {
+                        $URL.$FINArray().$add($fbPatch.clearObj(project)).then(function(data) {
                         });
                     })
                 }
             });
         };
         $scope.showFinished = function(){
-            $scope.projects = $FINArray;
+            $scope.projects = $URL.$FINArray();
             $scope.showType = "FIN";
         }
 
         $scope.showTodo = function(){
-            $scope.projects = $TODOArray;
+            $scope.projects = $URL.$TODOArray;
             $scope.showType = "TODO";
         }
 
@@ -126,29 +149,29 @@ angular.module('project', ['ngRoute', 'firebase'])
         };
     })
 
-    .controller('CreateCtrl', function($scope, $location, $timeout, $TODOArray) {
+    .controller('CreateCtrl', function($scope, $location, $URL) {
         $scope.importances = importances;
         $scope.project = {importance: default_importance};
 
         $scope.save = function() {
             $scope.project.done = false;
-            $TODOArray.$add($scope.project).then(function(data) {
-                $location.path('/');
+            $URL.$TODOArray().$add($scope.project).then(function(data) {
+                $location.path('/list');
             });
         };
     })
 
-    .controller('EditCtrl', function($scope, $location, $routeParams, $TODOArray, $FINArray) {
+    .controller('EditCtrl', function($scope, $location, $routeParams, $URL) {
         var projectId = $routeParams.projectId,
             showType = $routeParams.showType,
             projectIndex;
 
         switch(showType){
             case "TODO":
-                $scope.projects = $TODOArray;
+                $scope.projects = $URL.$TODOArray();
                 break;
             case "FIN":
-                $scope.projects = $FINArray;
+                $scope.projects = $URL.$FINArray();
                 break;
             default:
         }
@@ -165,13 +188,13 @@ angular.module('project', ['ngRoute', 'firebase'])
 
         $scope.destroy = function() {
             $scope.projects.$remove($scope.project).then(function(data) {
-                $location.path('/');
+                $location.path('/list');
             });
         };
 
         $scope.save = function() {
             $scope.projects.$save($scope.project).then(function(data) {
-                $location.path('/');
+                $location.path('/list');
             });
         };
     });
