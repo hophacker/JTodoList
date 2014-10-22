@@ -116,6 +116,7 @@ angular.module('project', ['ngRoute', 'firebase'])
                         console.log(msg);
                     });
                     $location.path('/list');
+                    if(!$scope.$$phase) $scope.$apply(); //important!!!
                 }
             }, {
                 remember: "sessionOnly"
