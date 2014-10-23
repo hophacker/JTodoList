@@ -56,6 +56,10 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 controller:'forgetpassCtrl',
                 templateUrl:'forgetpass.html'
             })
+            .when('/message/:type', {
+                controller:'messageCtrl',
+                templateUrl:'message.html'
+            })
             .otherwise({
                 redirectTo:'/'
             });
@@ -105,13 +109,21 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                     }
                 )
 
+            },
+            $signout: function(){
+                chrome.runtime.sendMessage({
+                        type: "signout"
+                    }, function(res){
+                        console.log(res)
+                    }
+                )
             }
         }
     })
     // factory for presenting error/warning message
     .factory('$error', function(){
         return {
-            $signinError: function(error){
+            $signin: function(error){
                 if (error.code === "INVALID_EMAIL"){
                     console.log(error);
                     $('#email').val('').attr('placeholder', error.message);
@@ -119,8 +131,14 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                     $('#password').val('').attr('placeholder', error.message);
                 }
             },
-            $signupError: function(error){
+            $signup: function(error){
                 if (error.code === "EMAIL_TAKEN"){
+                    $('#email').val('').attr('placeholder', error.message);
+                }
+            },
+            $forgetpass: function(error){
+                $('#email').val('').attr('placeholder', error.message);
+                if (error.code === "INVALID_USER"){
                     $('#email').val('').attr('placeholder', error.message);
                 }
             }
@@ -142,21 +160,32 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                     if (error === null){
                         $message.$signin($location, $scope, authData.uid);
                     }else{
-                        $error.$signinError(error);
+                        $error.$signin(error);
                     }
                 }, {
                     remember: "sessionOnly"
                 });
+            },
+            $signout: function(){
+                $URL.$firebaseRef().unauth();
+                $message.$signout();
+                $location.path('/');
             }
         }
     })
-    .controller('forgetpassCtrl', function($scope){
+    .controller('messageCtrl', function($routeParams, $scope){
+        var type2Mes = {passResetEmailSent: 'Password reset email sent successfully!'};
+        $scope.message = type2Mes[$routeParams.type];
+    })
+    .controller('forgetpassCtrl', function($scope, $URL, $error, $location){
+        $scope.sent = false;
         $scope.submit = function(){
-            $URL.$firebaseRef().resetPassword($scope.user.email, function(error) {
+            $URL.$firebaseRef().resetPassword($scope.user, function(error) {
                 if (error === null) {
-                    console.log("Password reset email sent successfully");
+                    gotoUrl($location, $scope, '/message/passResetEmailSent');
                 } else {
                     console.log("Error sending password reset email:", error);
+                    $error.$forgetpass(error);
                 }
             });
 
@@ -182,22 +211,17 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                     $jieauth.$signin($scope);
                 }else{
                     console.log(error);
-                    $error.$signupError(error);
+                    $error.$signup(error);
                 }
             });
         };
 
     })
-    .controller('ListCtrl', function($scope, $URL, $fbPatch, $location) {
+    .controller('ListCtrl', function($scope, $URL, $fbPatch, $jieauth) {
         $scope.tabs = [
             { title:'Dynamic Title 1', content:'Dynamic content 1' },
             { title:'Dynamic Title 2', content:'Dynamic content 2', disabled: true }
         ];
-
-        $scope.alerts = [
-    { type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.' },
-    { type: 'success', msg: 'Well done! You successfully read this important alert message.' }
-  ];
 
         $scope.alertMe = function() {
             setTimeout(function() {
@@ -219,6 +243,9 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 }
             });
         };
+        $scope.signout = function(){
+            $jieauth.$signout();
+        }
         $scope.remaining = function() {
             var count = 0;
             angular.forEach($scope.todoProjects, function(project) {

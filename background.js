@@ -33,6 +33,10 @@
                     uid = request.data.uid;
                     sendResponse({result: 'ok'});
                     break;
+                case "signout":
+                    signin = false;
+                    uid = '';
+                    sendResponse({result: 'ok'});
                 default:
             }
         });
