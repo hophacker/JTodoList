@@ -1,6 +1,6 @@
 {
-    "name": "Jienote",
-    "version": "0.2.4.2",
+    "name": "Todolist",
+    "version": "1.0.9",
     "manifest_version": 2,
     "background": {
         "scripts": ["background.js"]
@@ -8,10 +8,10 @@
     "browser_action": {
         "default_icon": "logo_19x19.png",
         "default_popup": "popup.html",
-        "default_title": "Jienote"
+        "default_title": "Todo List"
     },
 
-    "description": "Jienote is a omnipotent note",
+    "description": "TodoList helps you manage your todolist easily and fastly",
     "icons": {
         "128": "logo_128x128.png",
         "64": "logo_64x64.png",

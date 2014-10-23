@@ -52,6 +52,10 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 controller:'CreateCtrl',
                 templateUrl:'detail.html'
             })
+            .when('/forgetpass', {
+                controller:'forgetpassCtrl',
+                templateUrl:'forgetpass.html'
+            })
             .otherwise({
                 redirectTo:'/'
             });
@@ -107,14 +111,19 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
     // factory for presenting error/warning message
     .factory('$error', function(){
         return {
-           $loginError: function(error){
-               if (error.code === "INVALID_EMAIL"){
-                   console.log(error);
-                   $('#email').val('').attr('placeholder', error.message);
-               }else if (error.code === "INVALID_PASSWORD"){
-                   $('#password').val('').attr('placeholder', error.message);
-               }
-           }
+            $signinError: function(error){
+                if (error.code === "INVALID_EMAIL"){
+                    console.log(error);
+                    $('#email').val('').attr('placeholder', error.message);
+                }else if (error.code === "INVALID_PASSWORD"){
+                    $('#password').val('').attr('placeholder', error.message);
+                }
+            },
+            $signupError: function(error){
+                if (error.code === "EMAIL_TAKEN"){
+                    $('#email').val('').attr('placeholder', error.message);
+                }
+            }
         }
     })
     .factory('$fbPatch', function(){
@@ -126,38 +135,55 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
         return this;
     })
-    .controller('signinCtrl', function($scope, $URL, $location, $message, $error){
+    .factory('$jieauth', function($URL, $location, $message, $error){
+        return {
+            $signin: function($scope){
+                $URL.$firebaseRef().authWithPassword($scope.user, function(error, authData) {
+                    if (error === null){
+                        $message.$signin($location, $scope, authData.uid);
+                    }else{
+                        $error.$signinError(error);
+                    }
+                }, {
+                    remember: "sessionOnly"
+                });
+            }
+        }
+    })
+    .controller('forgetpassCtrl', function($scope){
+        $scope.submit = function(){
+            $URL.$firebaseRef().resetPassword($scope.user.email, function(error) {
+                if (error === null) {
+                    console.log("Password reset email sent successfully");
+                } else {
+                    console.log("Error sending password reset email:", error);
+                }
+            });
+
+        }
+    })
+    .controller('signinCtrl', function($scope, $URL, $location, $jieauth){
         checkSignin(function(uid) {
                 $URL.setUID(uid);
                 gotoUrl($location,$scope,"/list");
         });
         $scope.type = "signin";
         $scope.submit = function(){
-            var login = $scope.user;
-            $URL.$firebaseRef().authWithPassword(login, function(error, authData) {
-                if (error === null){
-                    $message.$signin($location, $scope, authData.uid);
-                }else{
-                    $error.$loginError(error);
-                }
-            }, {
-                remember: "sessionOnly"
-            });
+            $jieauth.$signin($scope);
         };
     })
-    .controller('signupCtrl', function($scope, $URL, $location, $message, $error){
+    .controller('signupCtrl', function($scope, $URL, $jieauth, $error){
         $scope.type = "signup";
 
         $scope.submit = function(){
             var login = $scope.user;
-            $URL.$firebaseRef().createUser(login, function(error, authData) {
+            $URL.$firebaseRef().createUser(login, function(error) {
                 if (error === null){
-                    $message.$signin($location, $scope, authData.uid);
+                    $jieauth.$signin($scope);
                 }else{
-                    $error.$loginError(error);
+                    console.log(error);
+                    $error.$signupError(error);
                 }
-            }, {
-                remember: "sessionOnly"
             });
         };
 
@@ -167,6 +193,11 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
             { title:'Dynamic Title 1', content:'Dynamic content 1' },
             { title:'Dynamic Title 2', content:'Dynamic content 2', disabled: true }
         ];
+
+        $scope.alerts = [
+    { type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.' },
+    { type: 'success', msg: 'Well done! You successfully read this important alert message.' }
+  ];
 
         $scope.alertMe = function() {
             setTimeout(function() {
