@@ -1,8 +1,6 @@
 (function(){
-//    var sendR;
-//    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-//        sendR = sendResponse;
-//    });
+    var signin = false;
+    var uid = '';
     chrome.extension.onConnect.addListener(function(port) {
         port.onMessage.addListener(function(msg) {
             request = JSON.parse(msg);
@@ -23,6 +21,21 @@
 
         });
     });
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            console.log(request);
+            switch(request.type){
+                case "checkSignin":
+                    sendResponse({signin: signin, uid: uid});
+                    break;
+                case "signin":
+                    signin = true;
+                    uid = request.data.uid;
+                    sendResponse({result: 'ok'});
+                    break;
+                default:
+            }
+        });
 
 //    chrome.storage.sync.set($scope.user, function(){
 //        console.log("stored okly!");

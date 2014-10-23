@@ -1,29 +1,63 @@
 <input type="text" ng-model="search" class="search-query" placeholder="Search">
 
-<label ng-show="showType=='TODO'">{{remaining()}} of {{projects.length}} remaining</label>
-<label ng-show="showType=='FIN'">{{projects.length}} Finished</label>
+<label>
+    <span class="text-warning"> {{remaining()}} of {{todoProjects.length}} remaining</span>,
+    <span class="text-success">{{archivedProjects.length}} archived</span>
+</label>
 
-<button ng-click="archive()"  ng-show="showType=='TODO'" class="btn btn-warning btn-sm">Archive Finished</button>
-<button ng-click="showTodo()" ng-show="showType!='TODO'" class="btn btn-primary btn-sm">Show Todo</button>
-<button ng-click="showFinished()" ng-show="showType!='FIN'" class="btn btn-primary btn-sm">Show Finished</button>
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th class="col-xs-9">Todo</th>
-        <th class="col-xs-2">Importance</th>
-        <th class="col-xs-1"><a href="#/new" ng-show="showType=='TODO'"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="project in projects | filter:search | orderBy:'name'" >
-        <td class="done-{{project.done}}">{{project.description}}</td>
-        <td>{{project.importance.name}}</td>
-        <td>
-            <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
-            <input type="checkbox" ng-model="project.done" ng-show="showType=='TODO'" ng-click="updateDone(project)">
-        </td>
-        {{ project.id }}
-    </tr>
+<!--<button ng-click="showTodo()" ng-show="showType!='TODO'" class="btn btn-primary btn-sm">Show Todo</button>-->
+<!--<button ng-click="showFinished()" ng-show="showType!='ARC'" class="btn btn-primary btn-sm">Show Finished</button>-->
 
-    </tbody>
-</table>
+
+<tabset>
+    <tab heading="Todo">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th class="col-xs-9">Description</th>
+                <th class="col-xs-2">Importance</th>
+                <th class="col-xs-1"><a href="#/new"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="project in todoProjects | filter:search | orderBy:'name'" >
+                <td class="done-{{project.done}}">{{project.description}}</td>
+                <td>{{project.importance.name}}</td>
+                <td>
+                    <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
+                    <input type="checkbox" ng-model="project.done" ng-click="updateDone(project)">
+                </td>
+                {{ project.id }}
+            </tr>
+            </tbody>
+        </table>
+        <button ng-click="archive()"  class="btn btn-warning btn-sm">Archive Finished</button>
+    </tab>
+
+    <tab heading="Archived">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th class="col-xs-9">Description</th>
+                <th class="col-xs-3">Importance</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="project in archivedProjects | filter:search | orderBy:'name'" >
+                <td>{{project.description}}</td>
+                <td>{{project.importance.name}}</td>
+                {{ project.id }}
+            </tr>
+            </tbody>
+        </table>
+    </tab>
+    <!--<tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active" disabled="tab.disabled">-->
+    <!--{{tab.content}}-->
+    <!--</tab>-->
+    <!--<tab select="alertMe()">-->
+    <!--<tab-heading>-->
+    <!--<i class="glyphicon glyphicon-bell"></i> Alert!-->
+    <!--</tab-heading>-->
+    <!--</tab>-->
+</tabset>
+
