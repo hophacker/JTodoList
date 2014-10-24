@@ -1,4 +1,4 @@
-JTodoList
+JTodoList ![Logo](https://github.com/hophacker/JTodoList/blob/master/logo_48x48.png)
 =========
 
 JTodolist helps you create and manage todolist quickly, easily.
