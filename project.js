@@ -235,7 +235,7 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
             angular.forEach(archivedIds, function(id, key) {
                 var p = $TODO.$getRecord(id);
                 $scope.todoProjects.$remove(p).then(function(data){
-                    $URL.$ARCArray().$add($fbPatch.clearObj(project)).then(function(data) {
+                    $URL.$ARCArray().$add($fbPatch.clearObj(p)).then(function(data) {
                         console.log(data);
                     });
                 });
