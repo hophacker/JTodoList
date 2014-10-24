@@ -1,3 +1,6 @@
+/*Copyright (c) 2014 ICRL
+
+See the file license.txt for copying permission.*/
 /*global Firebase: true */
 /*
  project {
