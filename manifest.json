@@ -1,6 +1,6 @@
 {
-    "name": "Todolist",
-    "version": "1.0.9",
+    "name": "JTodolist",
+    "version": "1.1.0",
     "manifest_version": 2,
     "background": {
         "scripts": ["background.js"]
@@ -8,7 +8,7 @@
     "browser_action": {
         "default_icon": "logo_19x19.png",
         "default_popup": "popup.html",
-        "default_title": "Todo List"
+        "default_title": "JTodoList"
     },
 
     "description": "TodoList helps you manage your todolist easily and fastly",
