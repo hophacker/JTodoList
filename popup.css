@@ -11,3 +11,10 @@ body{
 }
 body{padding-top:20px;}
 
+
+.glyphicon-lg{
+    font-size: 1.5em;
+}
+.padright-sm{
+    padding-right: 20px;
+}

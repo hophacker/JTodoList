@@ -60,6 +60,10 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 controller:'messageCtrl',
                 templateUrl:'message.html'
             })
+            .when('/changepass', {
+                controller:'changepassCtrl',
+                templateUrl:'changepass.html'
+            })
             .otherwise({
                 redirectTo:'/'
             });
@@ -120,30 +124,6 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
             }
         }
     })
-    // factory for presenting error/warning message
-    .factory('$error', function(){
-        return {
-            $signin: function(error){
-                if (error.code === "INVALID_EMAIL"){
-                    console.log(error);
-                    $('#email').val('').attr('placeholder', error.message);
-                }else if (error.code === "INVALID_PASSWORD"){
-                    $('#password').val('').attr('placeholder', error.message);
-                }
-            },
-            $signup: function(error){
-                if (error.code === "EMAIL_TAKEN"){
-                    $('#email').val('').attr('placeholder', error.message);
-                }
-            },
-            $forgetpass: function(error){
-                $('#email').val('').attr('placeholder', error.message);
-                if (error.code === "INVALID_USER"){
-                    $('#email').val('').attr('placeholder', error.message);
-                }
-            }
-        }
-    })
     .factory('$fbPatch', function(){
         this.clearObj = function(obj){
             delete obj.$id;
@@ -153,14 +133,15 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
         return this;
     })
-    .factory('$jieauth', function($URL, $location, $message, $error){
+    .factory('$jieauth', function($URL, $location, $message){
         return {
             $signin: function($scope){
                 $URL.$firebaseRef().authWithPassword($scope.user, function(error, authData) {
                     if (error === null){
                         $message.$signin($location, $scope, authData.uid);
                     }else{
-                        $error.$signin(error);
+                        $scope.error = error
+                        $scope.$apply();
                     }
                 }, {
                     remember: "sessionOnly"
@@ -174,18 +155,35 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         }
     })
     .controller('messageCtrl', function($routeParams, $scope){
-        var type2Mes = {passResetEmailSent: 'Password reset email sent successfully!'};
+        var type2Mes = {
+            passResetEmailSent: 'Password reset email sent successfully!',
+            passChanged: "Password changed successfully"
+
+        };
         $scope.message = type2Mes[$routeParams.type];
     })
-    .controller('forgetpassCtrl', function($scope, $URL, $error, $location){
+    .controller('changepassCtrl', function($scope, $location, $URL){
+        $scope.submit = function(){
+            $URL.$firebaseRef().changePassword($scope.user, function(error) {
+                if (error === null) {
+                    gotoUrl($location, $scope, '/message/passChanged');
+                } else {
+                    $scope.error = error;
+                    $scope.apply();
+                }
+            });
+
+        }
+    })
+    .controller('forgetpassCtrl', function($scope, $URL, $location){
         $scope.sent = false;
         $scope.submit = function(){
             $URL.$firebaseRef().resetPassword($scope.user, function(error) {
                 if (error === null) {
                     gotoUrl($location, $scope, '/message/passResetEmailSent');
                 } else {
-                    console.log("Error sending password reset email:", error);
-                    $error.$forgetpass(error);
+                    $scope.error = error;
+                    $scope.$apply();
                 }
             });
 
@@ -201,7 +199,7 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
             $jieauth.$signin($scope);
         };
     })
-    .controller('signupCtrl', function($scope, $URL, $jieauth, $error){
+    .controller('signupCtrl', function($scope, $URL, $jieauth){
         $scope.type = "signup";
 
         $scope.submit = function(){
@@ -210,24 +208,14 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 if (error === null){
                     $jieauth.$signin($scope);
                 }else{
-                    console.log(error);
-                    $error.$signup(error);
+                    $scope.error = error;
+                    $scope.$apply();
                 }
             });
         };
 
     })
     .controller('ListCtrl', function($scope, $URL, $fbPatch, $jieauth) {
-        $scope.tabs = [
-            { title:'Dynamic Title 1', content:'Dynamic content 1' },
-            { title:'Dynamic Title 2', content:'Dynamic content 2', disabled: true }
-        ];
-
-        $scope.alertMe = function() {
-            setTimeout(function() {
-                alert('You\'ve selected the alert tab!');
-            });
-        };
         $TODO = $URL.$TODOArray();
         $scope.todoProjects = $TODO;
         $scope.archivedProjects = $URL.$ARCArray();
@@ -235,9 +223,14 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         $scope.archive = function() {
             angular.forEach($scope.todoProjects, function(project, key) {
                 if (project.done){
-                    var p = $TODO.$getRecord(project.$id);
+                    var projectIndex = $TODO.$indexFor(project.$id);
+                    var p = $TODO[projectIndex];
+//                    var p = $TODO.$getRecord(project.$id);
+                    console.log(p)
                     $URL.$TODOArray().$remove(p).then(function(data){
                         $URL.$ARCArray().$add($fbPatch.clearObj(project)).then(function(data) {
+                            console.log(data);
+//                            $scope.$apply();
                         });
                     });
                 }

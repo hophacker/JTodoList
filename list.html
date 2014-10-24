@@ -1,7 +1,20 @@
 <input type="text" ng-model="search" class="search-query" placeholder="Search">
-<a ng-click="signout()" class="pull-right">Logout
-    <i class="glyphicon glyphicon-log-out"></i>
-</a>
+<span class="dropdown pull-right padright-sm" on-toggle="">
+        <a class="dropdown-toggle">
+            <!--<i class="icon-large icon-settings"> </i>-->
+            <i class="glyphicon glyphicon-cog glyphicon-lg"> </i>
+        </a>
+      <ul class="dropdown-menu">
+          <li>
+              <a ng-click="signout()">Logout
+                  <i class="glyphicon glyphicon-log-out"></i>
+              </a>
+          </li>
+
+          <li><a ng-href="#/changepass">Change Password</a></li>
+      </ul>
+    </span>
+<!--<a ng-click="signout()" class="pull-right">Logout <i class="icon-large icon-settings"></i></a>-->
 
 <label>
     <span class="text-warning"> {{remaining()}} of {{todoProjects.length}} remaining</span>,
@@ -34,7 +47,7 @@
             </tr>
             </tbody>
         </table>
-        <button ng-click="archive()"  class="btn btn-warning btn-sm">Archive Finished</button>
+        <button ng-click="archive()"  class="btn btn-primary btn-sm">Archive Finished</button>
     </tab>
 
     <tab heading="Archived">

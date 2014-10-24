@@ -1,9 +1,9 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4 col-md-offset-4">
-            <div class="panel panel-default" ng-hide="sent">
+            <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title"> Find your password back </h3>
+                    <h3 class="panel-title">Change your password</h3>
                 </div>
                 <div class="panel-body">
                     <form ng-submit="submit()" accept-charset="UTF-8" role="form">
@@ -11,7 +11,13 @@
                             <div class="form-group">
                                 <input ng-model="user.email" class="form-control" placeholder="Email" id="email" name="email" type="text" required>
                             </div>
-                            <input class="btn btn-lg btn-success btn-block" type="submit" value="Submit">
+                            <div class="form-group">
+                                <input ng-model="user.oldPassword" class="form-control" placeholder="Old Password" id="password" name="password" type="password" value="" required>
+                            </div>
+                            <div class="form-group">
+                                <input ng-model="user.newPassword" class="form-control" placeholder="New Password" id="password" name="password" type="password" value="" required>
+                            </div>
+                            <input class="btn btn-lg btn-success btn-block" type="submit" value="Change Password">
                         </fieldset>
                     </form>
                 </div>
