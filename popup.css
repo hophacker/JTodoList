@@ -16,5 +16,18 @@ body{padding-top:20px;}
     font-size: 1.5em;
 }
 .padright-sm{
-    padding-right: 20px;
+    padding-right: 10px;
+}
+.navbar{
+    min-height:25px;
+    background-color: white;
+    border-color: black;
+    border-style: none;
+    border-bottom-style: solid;
+}
+.main-content{
+    margin-top: 15px;
+}
+.container .dropdown a{
+    margin-left: 10px;
 }

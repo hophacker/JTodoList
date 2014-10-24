@@ -28,7 +28,7 @@ function gotoUrl($location, $scope, url){
     if(!$scope.$$phase) $scope.$apply(); //important!!!
 }
 
-angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
+var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
     .config(function($routeProvider) {
         $routeProvider
             .when('/list', {
@@ -236,9 +236,6 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
                 }
             });
         };
-        $scope.signout = function(){
-            $jieauth.$signout();
-        }
         $scope.remaining = function() {
             var count = 0;
             angular.forEach($scope.todoProjects, function(project) {
@@ -293,6 +290,11 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
     });
 
+app.controller('appCtrl', function($scope, $jieauth){
+    $scope.signout = function(){
+        $jieauth.$signout();
+    }
+})
 
 
 //port.postMessage(JSON.stringify({
@@ -320,3 +322,4 @@ angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
 //        remember: "sessionOnly"
 //    });
 //});
+
