@@ -215,25 +215,27 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
 
     })
-    .controller('ListCtrl', function($scope, $URL, $fbPatch, $jieauth) {
-        $TODO = $URL.$TODOArray();
-        $scope.todoProjects = $TODO;
+    .controller('ListCtrl', function($scope, $URL, $fbPatch, $sharedService) {
+        $TODO =$URL.$TODOArray();
+        $scope.todoProjects =  $TODO;
         $scope.archivedProjects = $URL.$ARCArray();
         $scope.showType = "TODO";
+        $scope.$on('setFilterWord', function() {
+            $scope.search = $sharedService.filterWord;
+        });
         $scope.archive = function() {
-            angular.forEach($scope.todoProjects, function(project, key) {
-                if (project.done){
-                    var projectIndex = $TODO.$indexFor(project.$id);
-                    var p = $TODO[projectIndex];
-//                    var p = $TODO.$getRecord(project.$id);
-                    console.log(p)
-                    $URL.$TODOArray().$remove(p).then(function(data){
-                        $URL.$ARCArray().$add($fbPatch.clearObj(project)).then(function(data) {
-                            console.log(data);
-//                            $scope.$apply();
-                        });
+            var archivedIds = [];
+            angular.forEach($scope.todoProjects, function(todoP, key) {
+                if (todoP.done)
+                    archivedIds.push(todoP.$id);
+            });
+            angular.forEach(archivedIds, function(id, key) {
+                var p = $TODO.$getRecord(id);
+                $scope.todoProjects.$remove(p).then(function(data){
+                    $URL.$ARCArray().$add($fbPatch.clearObj(project)).then(function(data) {
+                        console.log(data);
                     });
-                }
+                });
             });
         };
         $scope.remaining = function() {
@@ -290,12 +292,36 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
     });
 
-app.controller('appCtrl', function($scope, $jieauth){
+app.factory('$sharedService', function($rootScope){
+    return{
+        filterWord: '',
+        broadcastFilterStr: function(word){
+            this.filterWord = word;
+            $rootScope.$broadcast('setFilterWord');
+        }
+    }
+});
+app.controller('appCtrl', function($scope, $jieauth, $sharedService){
     $scope.signout = function(){
         $jieauth.$signout();
     }
+    $scope.filter = function(){
+        $sharedService.broadcastFilterStr($scope.filterWord);
+    }
 })
 
+app.directive('ngEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngEnter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+});
 
 //port.postMessage(JSON.stringify({
 //    type: 'getData',

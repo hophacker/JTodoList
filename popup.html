@@ -21,6 +21,10 @@
 
             <div class="navbar-inner">
                 <div class="container">
+                    <a ng-click="filter()"><i class="glyphicon glyphicon-lg glyphicon-search"></i></a>
+                    <input type="text" ng-model="filterWord" ng-enter="filter()" class="search-query" placeholder="Search">
+
+
                     <span class="dropdown pull-right" on-toggle="">
                         <a ng-href="#/list" class="glyphicon glyphicon-lg glyphicon-home"></a>
                         <a class="dropdown-toggle">
