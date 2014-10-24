@@ -31,3 +31,6 @@ body{padding-top:20px;}
 .container .dropdown a{
     margin-left: 10px;
 }
+.navbar .search-query{
+    margin-bottom: 2px;
+}
