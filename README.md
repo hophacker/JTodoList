@@ -35,7 +35,7 @@ Installation
 
 License
 ----
-No License Currently
+MIT License
 
 
 [Chrome Extension Link]:https://chrome.google.com/webstore/detail/jtodolist/oephpjmmbkbdhdkejphammknpecidcam/details?hl=en-US
