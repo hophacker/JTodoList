@@ -4,12 +4,12 @@ See the file license.txt for copying permission.-->
 <form id="myForm" name="myForm" >
     <div class="form-group row" ng-class="{error: myForm.description.$invalid && !myForm.description.$pristine}">
         <label for="description" class="col-xs-2 col-xs-offset-2">Description</label>
-        <input id="description" name="description" class="form-group col-xs-6" ng-model="project.description"/>
+        <input id="description" name="description" class="form-group col-xs-6" ng-model="project.description" required/>
     </div>
 
     <div class="form-group row" ng-class="{error: myForm.importance.$invalid && !myForm.importance.$pristine}">
         <label for="importance" class="col-xs-2 col-xs-offset-2">Importance</label>
-        <select id="importance" class="form-group" name="importance" ng-model="project.importance" ng-options="importance.name for importance in importances" required></select>
+        <select id="importance" class="form-group" name="importance" ng-model="project.importance" ng-options="i.value as i.level for i in importances" required></select>
     </div>
 
     <div class="form-group text-center" ng-class="{error: myForm.description.$invalid && !myForm.description.$pristine}">

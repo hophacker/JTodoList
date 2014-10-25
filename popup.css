@@ -6,15 +6,21 @@ body{
     height: 500px;
 }
 .done-true {
-  text-decoration: line-through;
-  color: grey;
+    text-decoration: line-through;
+    color: grey;
 }
 #myForm{
     margin-top: 50px;
 }
 body{padding-top:20px;}
 
-
+.submitLink {
+    background-color: transparent;
+    text-decoration: underline;
+    border: none;
+    color: #2A6496;
+    cursor: pointer;
+}
 .glyphicon-lg{
     font-size: 1.5em;
 }

@@ -6,7 +6,7 @@ See the file license.txt for copying permission.-->
 
 <label>
     <span class="text-warning"> {{remaining()}} of {{todoProjects.length}} remaining</span>,
-    <span class="text-success">{{archivedProjects.length}} archived</span>
+    <span class="text-success">{{finishedProjects.length}} archived</span>
 </label>
 
 <!--<button ng-click="showTodo()" ng-show="showType!='TODO'" class="btn btn-primary btn-sm">Show Todo</button>-->
@@ -20,39 +20,73 @@ See the file license.txt for copying permission.-->
             <tr>
                 <th class="col-xs-8">Description</th>
                 <th class="col-xs-2">Importance</th>
+                <th class="col-xs-2"><a href="#/new">Action</i></a></th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="project in todoProjects | filter:search | orderBy:'name'" >
+                    <td>
+                        <span editable-text="project.description" e-name="description" e-form="projectRow" class="done-{{project.done}}"  e-required>
+                            {{project.description}}
+                        </span>
+                    </td>
+                    <td>
+                        <span editable-select="project.importance" e-name="importance" e-form="projectRow" e-ng-options="i.value as i.text for i in importances" e-required>
+                            {{ (importances | filter:{value: project.importance})[0].text || 'Not set' }}
+                        </span>
+                    </td>
+                    <td>
+                        <form editable-form name="projectRow" class="form-buttons form-inline" onbeforesave="save('todo', project, $data)" ng-show="projectRow.$visible" shown="inserted == project">
+                            <button type="submit" ng-disabled="projectRow.$waiting" class="submitLink">
+                                <span class="glyphicon glyphicon-lg glyphicon-save"></span>
+                            </button>
+                            <a ng-click="projectRow.$cancel()" ng-disabled="projectRow.$waiting"><i class="glyphicon glyphicon-lg glyphicon-ban-circle"></i></a>
+                        </form>
+                        <div class="buttons" ng-show="!projectRow.$visible">
+                            <a ng-click="projectRow.$show()"><i class="glyphicon glyphicon-pencil"></i></a>
+                            <a ng-click="finish(project.$id)"><i class="glyphicon glyphicon-lg glyphicon-ok-circle"></i></a>
+                            <a ng-click="remove('todo', project.$id)"><i class="glyphicon glyphicon-lg glyphicon-remove-circle"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input ng-model="addProject.description" type="text" name="description" required="required" class="editable-input form-control ng-pristine ng-invalid ng-invalid-required ng-touched" ng-model="yes">
+                    </td>
+                    <td>
+                        <select class="editable-input form-control ng-pristine ng-valid ng-valid-required ng-touched"
+                                name="importance"
+                                ng-model="addProject.importance"
+                                ng-init="addProject.importance = 1"
+                                ng-options="i.value as i.text for i in importances" required></select>
+                    </td>
+                    <td>
+                        <a ng-click="addTodoProject()"><i class="glyphicon glyphicon-plus-sign glyphicon-lg"></i></a>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </tab>
+
+    <tab heading="Finished">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th class="col-xs-8">Description</th>
+                <th class="col-xs-2">Importance</th>
                 <th class="col-xs-2"><a href="#/new"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="project in todoProjects | filter:search | orderBy:'name'" >
-                <td class="done-{{project.done}}">{{project.description}}</td>
-                <td>{{project.importance.name}}</td>
-                <td>
-                    <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
-                    <a ng-click="archive(project.$id)"><i class="glyphicon glyphicon-ok-circle"></i></a>
-                    <a ng-click="remove(project.$id)"><i class="glyphicon glyphicon-remove-circle"></i></a>
-                    <input type="checkbox" ng-model="project.done" ng-click="updateDone(project)">
-                </td>
-                {{ project.id }}
-            </tr>
-            </tbody>
-        </table>
-        <button ng-click="archiveAll()"  class="btn btn-primary btn-sm">Archive Finished</button>
-    </tab>
+            <tr ng-repeat="project in finishedProjects | filter:search | orderBy:'name'" >
 
-    <tab heading="Archived">
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th class="col-xs-9">Description</th>
-                <th class="col-xs-3">Importance</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="project in archivedProjects | filter:search | orderBy:'name'" >
                 <td>{{project.description}}</td>
                 <td>{{project.importance.name}}</td>
-                {{ project.id }}
+                <td>
+                    <a ng-href="#/edit/finished/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
+                    <a ng-click="remove('finished', project.$id)"><i class="glyphicon glyphicon-lg glyphicon-remove-circle"></i></a>
+                </td>
             </tr>
             </tbody>
         </table>
