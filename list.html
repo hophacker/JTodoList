@@ -18,9 +18,9 @@ See the file license.txt for copying permission.-->
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th class="col-xs-9">Description</th>
+                <th class="col-xs-8">Description</th>
                 <th class="col-xs-2">Importance</th>
-                <th class="col-xs-1"><a href="#/new"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
+                <th class="col-xs-2"><a href="#/new"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
             </tr>
             </thead>
             <tbody>
@@ -29,13 +29,15 @@ See the file license.txt for copying permission.-->
                 <td>{{project.importance.name}}</td>
                 <td>
                     <a ng-href="#/edit/{{showType}}/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
+                    <a ng-click="archive(project.$id)"><i class="glyphicon glyphicon-ok-circle"></i></a>
+                    <a ng-click="remove(project.$id)"><i class="glyphicon glyphicon-remove-circle"></i></a>
                     <input type="checkbox" ng-model="project.done" ng-click="updateDone(project)">
                 </td>
                 {{ project.id }}
             </tr>
             </tbody>
         </table>
-        <button ng-click="archive()"  class="btn btn-primary btn-sm">Archive Finished</button>
+        <button ng-click="archiveAll()"  class="btn btn-primary btn-sm">Archive Finished</button>
     </tab>
 
     <tab heading="Archived">

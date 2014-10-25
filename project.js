@@ -75,6 +75,25 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension):/);
         // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
     }])
+    .factory('$PROJECT', function($URL, $fbPatch){
+        var  $scope =  null;
+        var  $PROJECT = function($s){
+            $scope =  $s;
+        };
+        $PROJECT.prototype = {
+            archive: function (id) {
+                var p = $URL.$TODOArray().$getRecord(id);
+                $scope.todoProjects.$remove(p).then(function(){
+                    $scope.archivedProjects.$add(p);
+                })
+            },
+            removeTodo: function(id){
+                var p = $URL.$TODOArray().$getRecord(id);
+                $scope.todoProjects.$remove(p);
+            }
+        }
+        return $PROJECT;
+    })
     .factory('$URL', function($firebase){
         return {
             firebaseURL :  'https://boiling-heat-52.firebaseio.com/',
@@ -218,7 +237,9 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         };
 
     })
-    .controller('ListCtrl', function($scope, $URL, $fbPatch, $sharedService) {
+    .controller('ListCtrl', function($scope, $URL, $sharedService, $PROJECT) {
+        var $project = new $PROJECT($scope);
+
         $TODO =$URL.$TODOArray();
         $scope.todoProjects =  $TODO;
         $scope.archivedProjects = $URL.$ARCArray();
@@ -226,21 +247,22 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap'])
         $scope.$on('setFilterWord', function() {
             $scope.search = $sharedService.filterWord;
         });
-        $scope.archive = function() {
+        $scope.archiveAll = function() {
             var archivedIds = [];
             angular.forEach($scope.todoProjects, function(todoP, key) {
                 if (todoP.done)
                     archivedIds.push(todoP.$id);
             });
             angular.forEach(archivedIds, function(id, key) {
-                var p = $TODO.$getRecord(id);
-                $scope.todoProjects.$remove(p).then(function(data){
-                    $URL.$ARCArray().$add($fbPatch.clearObj(p)).then(function(data) {
-                        console.log(data);
-                    });
-                });
+                $project.archive(id);
             });
         };
+        $scope.archive = function(id){
+            $project.archive(id);
+        }
+        $scope.remove = function(id){
+            $project.removeTodo(id);
+        }
         $scope.remaining = function() {
             var count = 0;
             angular.forEach($scope.todoProjects, function(project) {
