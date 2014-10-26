@@ -13,13 +13,13 @@ See the file license.txt for copying permission.-->
     <tab heading="Todo">
         <table class="table">
             <thead>
-            <tr>
-                <th width="71%">Description
-                        <span class="text-success"> {{remaining()}} of {{todoProjects.length}} remaining</span>
-                </th>
-                <th width="15%">Importance</th>
-                <th width="14%">Action</th>
-            </tr>
+                <tr>
+                    <th width="71%">Description
+                            <span class="text-success"> {{remaining()}} of {{todoProjects.length}} remaining</span>
+                    </th>
+                    <th width="15%">Importance</th>
+                    <th width="14%">Action</th>
+                </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="project in todoProjects | filter:search | orderBy:'name'" >

@@ -21,11 +21,24 @@ body{padding-top:20px;}
     color: #2A6496;
     cursor: pointer;
 }
+
+
+
+input{
+    border: none;
+}
+
+thead{
+    color: #2A6496;
+}
 table, td, th {
     border-color: #2A6496;
     /*border: 1px solid #2A6496;*/
     /*1px solid green;*/
 }
+/*tr{*/
+    /*border: 1px dotted #2A6496;*/
+/*}*/
 .glyphicon-lg{
     font-size: 1.5em;
 }
