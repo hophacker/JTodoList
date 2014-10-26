@@ -50,10 +50,6 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
                 controller: 'signupCtrl',
                 templateUrl:'login.html'
             })
-            .when('/edit/:type/:projectId', {
-                controller:'EditCtrl',
-                templateUrl:'detail.html'
-            })
             .when('/new', {
                 controller:'CreateCtrl',
                 templateUrl:'detail.html'
@@ -273,11 +269,14 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
     })
     .controller('ListCtrl', function($scope, $URL, $sharedService, $PROJECT) {
         var $project = new $PROJECT($scope);
+        var defaultAddProject = {
+            importance: 1
+        };
         $scope.importances = importances;
         $scope.todoProjects = $URL.$TODOArray();
         $scope.finishedProjects = $URL.$FINArray();
         $scope.showType = "TODO";
-        $scope.addProject = null;
+        $scope.addProject = defaultAddProject;
         $scope.$on('setFilterWord', function() {
             $scope.search = $sharedService.filterWord;
         });
@@ -293,8 +292,7 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
         };
         $scope.finish = function(id){
             $project.finish(id);
-        }
-
+        };
         $scope.save = function(type, project, $data) {
             project.description = $data.description;
             project.importance = $data.importance;
@@ -306,9 +304,8 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
         };
         $scope.addTodoProject = function() {
             $scope.todoProjects.$add($scope.addProject);
-            $scope.addProject = {};
+            $scope.addProject = defaultAddProject;
         };
-
 
         $scope.remaining = function() {
             var count = 0;
@@ -317,11 +314,12 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
             });
             return count;
         };
+        $scope.remove = function(type, id) {
+            var sou = $project.getSource(type),
+                project = sou.$getRecord(id);
+            sou.$remove(project);
+        };
         $scope.updateDone = function(project){
-//            var item = $TODO.$getRecord( project.$id );
-//            item.done = project.done;
-//            $TODO.$save(item);
-            //$Pro.update(project.$id, {done: project.done});
         };
     })
 
@@ -336,30 +334,6 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
             });
         };
     })
-
-    .controller('EditCtrl', function($scope, $location, $routeParams, $URL) {
-        var projectId = $routeParams.projectId,
-            $SOURCE = $URL.getSource($routeParams.type)
-
-
-        $scope.importances = importances;
-
-        if (projectId === null){
-            $scope.project = {importance: default_importance};
-        }else{
-            $scope.project = $SOURCE.$getRecord(projectId);
-            var level = $scope.project.importance.level;
-            $scope.project.importance = importances[level];
-        }
-
-        $scope.destroy = function() {
-            $SOURCE.$remove($scope.project).then(function(data) {
-                $location.path('/list');
-            });
-        };
-
-    });
-
 app.factory('$sharedService', function($rootScope){
     return{
         filterWord: '',

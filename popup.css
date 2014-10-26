@@ -21,6 +21,11 @@ body{padding-top:20px;}
     color: #2A6496;
     cursor: pointer;
 }
+table, td, th {
+    border-color: #2A6496;
+    /*border: 1px solid #2A6496;*/
+    /*1px solid green;*/
+}
 .glyphicon-lg{
     font-size: 1.5em;
 }

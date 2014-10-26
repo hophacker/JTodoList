@@ -4,10 +4,6 @@ See the file license.txt for copying permission.-->
 
 <!--<a ng-click="signout()" class="pull-right">Logout <i class="icon-large icon-settings"></i></a>-->
 
-<label>
-    <span class="text-warning"> {{remaining()}} of {{todoProjects.length}} remaining</span>,
-    <span class="text-success">{{finishedProjects.length}} archived</span>
-</label>
 
 <!--<button ng-click="showTodo()" ng-show="showType!='TODO'" class="btn btn-primary btn-sm">Show Todo</button>-->
 <!--<button ng-click="showFinished()" ng-show="showType!='ARC'" class="btn btn-primary btn-sm">Show Finished</button>-->
@@ -15,12 +11,14 @@ See the file license.txt for copying permission.-->
 
 <tabset>
     <tab heading="Todo">
-        <table class="table table-bordered">
+        <table class="table">
             <thead>
             <tr>
-                <th class="col-xs-8">Description</th>
-                <th class="col-xs-2">Importance</th>
-                <th class="col-xs-2"><a href="#/new">Action</i></a></th>
+                <th width="71%">Description
+                        <span class="text-success"> {{remaining()}} of {{todoProjects.length}} remaining</span>
+                </th>
+                <th width="15%">Importance</th>
+                <th width="14%">Action</th>
             </tr>
             </thead>
             <tbody>
@@ -73,19 +71,36 @@ See the file license.txt for copying permission.-->
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th class="col-xs-8">Description</th>
+                <th class="col-xs-8">Description <span class="text-success">{{finishedProjects.length}} archived</span>
+                </th>
                 <th class="col-xs-2">Importance</th>
-                <th class="col-xs-2"><a href="#/new"><i class="glyphicon glyphicon-plus-sign"></i></a></th>
+                <th class="col-xs-2">Action</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="project in finishedProjects | filter:search | orderBy:'name'" >
 
-                <td>{{project.description}}</td>
-                <td>{{project.importance.name}}</td>
+            <tr ng-repeat="project in finishedProjects | filter:search | orderBy:'name'" >
                 <td>
-                    <a ng-href="#/edit/finished/{{project.$id}}"><i class="glyphicon glyphicon-pencil"></i></a>
-                    <a ng-click="remove('finished', project.$id)"><i class="glyphicon glyphicon-lg glyphicon-remove-circle"></i></a>
+                        <span editable-text="project.description" e-name="description" e-form="projectRow" class="done-{{project.done}}"  e-required>
+                            {{project.description}}
+                        </span>
+                </td>
+                <td>
+                        <span editable-select="project.importance" e-name="importance" e-form="projectRow" e-ng-options="i.value as i.text for i in importances" e-required>
+                            {{ (importances | filter:{value: project.importance})[0].text || 'Not set' }}
+                        </span>
+                </td>
+                <td>
+                    <form editable-form name="projectRow" class="form-buttons form-inline" onbeforesave="save('todo', project, $data)" ng-show="projectRow.$visible" shown="inserted == project">
+                        <button type="submit" ng-disabled="projectRow.$waiting" class="submitLink">
+                            <span class="glyphicon glyphicon-lg glyphicon-save"></span>
+                        </button>
+                        <a ng-click="projectRow.$cancel()" ng-disabled="projectRow.$waiting"><i class="glyphicon glyphicon-lg glyphicon-ban-circle"></i></a>
+                    </form>
+                    <div class="buttons" ng-show="!projectRow.$visible">
+                        <a ng-click="projectRow.$show()"><i class="glyphicon glyphicon-pencil"></i></a>
+                        <a ng-click="remove('finished', project.$id)"><i class="glyphicon glyphicon-lg glyphicon-remove-circle"></i></a>
+                    </div>
                 </td>
             </tr>
             </tbody>
