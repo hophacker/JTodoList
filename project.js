@@ -125,6 +125,10 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
                 this.todo = this.base + "todo/";
                 this.finished = this.base + "finished/";
             },
+            unsetUID    : function(){
+                this.todoArray = null;
+                this.finArray = null;
+            },
             $TODOArray  : function() {
                 if (this.todoArray === null) this.todoArray = $firebase(new Firebase(this.todo)).$asArray();
                 return this.todoArray;
@@ -200,6 +204,7 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
                 });
             },
             $signout: function(){
+                $URL.unsetUID();
                 $URL.$firebaseRef().unauth();
                 $message.$signout();
                 $location.path('/');
@@ -304,7 +309,7 @@ var app = angular.module('project', ['ngRoute', 'firebase', 'ui.bootstrap', 'xed
         };
         $scope.addTodoProject = function() {
             $scope.todoProjects.$add($scope.addProject);
-            $scope.addProject = defaultAddProject;
+            $scope.addProject.description = "";
         };
 
         $scope.remaining = function() {
